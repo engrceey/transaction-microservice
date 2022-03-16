@@ -1,10 +1,12 @@
 package com.reloadly.transactionservice.dto.request;
 
 import com.reloadly.transactionservice.constants.TransactionType;
+import lombok.Data;
 
 import javax.persistence.Column;
 import java.math.BigDecimal;
 
+@Data
 public class TransferRequestDto {
     @Column(name = "amount")
     private BigDecimal amount;

@@ -1,7 +1,5 @@
 package com.reloadly.transactionservice.dto.response;
 
-import com.reloadly.transactionservice.constants.TransactionType;
-
 import javax.persistence.Column;
 import java.math.BigDecimal;
 

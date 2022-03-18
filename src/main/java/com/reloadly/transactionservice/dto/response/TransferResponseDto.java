@@ -1,12 +1,14 @@
 package com.reloadly.transactionservice.dto.response;
 
-import java.math.BigDecimal;
+import lombok.Data;
 
+@Data
 public class TransferResponseDto {
-
-    private BigDecimal amount;
-
-    private long senderAccountNumber;
-
-    private String receiverAccountNumber;
+    private String statusCode;
+    private String senderName;
+    private long sendAccountNumber;
+    private String receiverName;
+    private boolean isTransactionSuccessful;
 }
+
+

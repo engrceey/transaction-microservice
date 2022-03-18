@@ -21,6 +21,9 @@ public class Transaction extends BaseEntity {
     @Column(name = "amount")
     private BigDecimal amount;
 
+    @Column(name = "transaction_id", nullable = false )
+    private String transactionId;
+
     @Enumerated(value = EnumType.STRING)
     @Column(name = "transaction_type")
     private TransactionType transactionType;
@@ -35,7 +38,7 @@ public class Transaction extends BaseEntity {
     private String receiver;
 
     @Column(name = "receiver_account_number")
-    private String receiverAccountNumber;
+    private long receiverAccountNumber;
 
     @Enumerated(value = EnumType.STRING)
     @Column(name = "transaction_status")

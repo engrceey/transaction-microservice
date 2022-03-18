@@ -1,26 +1,26 @@
 package com.reloadly.transactionservice.dto.request;
 
-import com.reloadly.transactionservice.constants.TransactionStatus;
-import com.reloadly.transactionservice.constants.TransactionType;
-import lombok.Builder;
+import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.math.BigDecimal;
 
-public class DepositRequestDto {
-
-    @Column(name = "amount")
+@Data
+public class DepositRequestDto implements Serializable {
+    @NotNull(message = "account cannot be empty")
+    @Min(value = 0)
     private BigDecimal amount;
 
-    @Column(name = "transaction_type")
-    private final TransactionType transactionType = TransactionType.DEPOSIT;
+    @NotBlank(message = "sender cannot be blank")
+    private String sender;
 
-    @Column(name = "sender_account_number")
-    private long senderAccountNumber;
+    @NotBlank(message = "receiver cannot be blank")
+    private String receiver;
 
-    @Column(name = "receiver_account_number")
-    private String receiverAccountNumber;
+    @NotNull
+    private Long receiverAccountNumber;
 
 }

@@ -1,10 +1,11 @@
 package com.reloadly.transactionservice.dto.response;
 
-import java.math.BigDecimal;
+import lombok.Data;
 
+@Data
 public class WithdrawResponseDto {
-
-    private BigDecimal amount;
-
-    private long senderAccountNumber;
+    private long accountNum;
+    private String name;
+    private String status;
+    private boolean isSuccessful;
 }

@@ -13,7 +13,6 @@ import com.reloadly.transactionservice.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -36,7 +35,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final RestTemplate restTemplate;
 
     @Override
-    public AccountTransactionResponseDto depositFunds(DepositRequestDto depositRequestDto, String bearerToken) {
+    public DepositResponse depositFunds(DepositRequestDto depositRequestDto, String bearerToken) {
         log.info("Service depositFunds - deposit funds for ::[{}]", depositRequestDto.getReceiver());
         final String url = String.format("%s/deposit-fund", ACCOUNT_TRANSACTION_BASE_URL);
 
@@ -47,9 +46,9 @@ public class TransactionServiceImpl implements TransactionService {
 
         log.info("Initiating request to deposit fund: [{}] :::", depositRequestDto.getReceiver());
 
-        ResponseEntity<AccountTransactionResponseDto> response = null;
+        ResponseEntity<DepositResponse> response = null;
         try {
-            response  = restTemplate.exchange(url,HttpMethod.POST, entity,AccountTransactionResponseDto.class);
+            response  = restTemplate.exchange(url,HttpMethod.POST, entity, DepositResponse.class);
         } catch (Exception exp) {
             log.error("An error occurred calling external api to deposit fund for :: [{}] :: Error msg :: [{}]",
                     depositRequestDto.getReceiver(), exp.getMessage());
@@ -116,8 +115,44 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public WithdrawResponseDto withdrawFunds(WithdrawalRequestDto withdrawalRequestDto) {
-        return null;
+    public WithdrawResponseDto withdrawFunds(WithdrawalRequestDto withdrawalRequestDto, String bearerToken) {
+        log.info("Service withdraw - withdraw funds for ::[{}]", withdrawalRequestDto.getAmount());
+        final String url = String.format("%s/withdraw-fund", ACCOUNT_TRANSACTION_BASE_URL);
+
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.set(HttpHeaders.AUTHORIZATION, bearerToken);
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<WithdrawalRequestDto> entity = new HttpEntity<>(withdrawalRequestDto, httpHeaders);
+
+        log.info("Initiating request to with fund: [{}] :::", withdrawalRequestDto.getAmount());
+
+        ResponseEntity<WithdrawResponse > response = null;
+        try {
+            response  = restTemplate.exchange(url,HttpMethod.POST, entity, WithdrawResponse.class);
+        } catch (Exception exp) {
+            log.error("An error occurred calling external api for :: [{}] :: Error msg :: [{}]",
+                    withdrawalRequestDto.getAmount() , exp.getMessage());
+            throw new CustomException("An error occurred calling external api");
+        }
+
+        String transactionId = UUID.randomUUID().toString();
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            Transaction transaction = new Transaction();
+            transaction.setTransactionType(TransactionType.WITHDRAW);
+            transaction.setTransactionStatus(TransactionStatus.SUCCESS);
+            transaction.setAmount(withdrawalRequestDto.getAmount());
+            transaction.setReceiver(Objects.requireNonNull(response.getBody()).getData().getName());
+            transaction.setSender(response.getBody().getData().getName());
+            transaction.setReceiverAccountNumber(response.getBody().getData().getAccountNum());
+            transaction.setSenderAccountNumber(response.getBody().getData().getAccountNum());
+            transaction.setTransactionId(transactionId);
+            transactionRepository.save(transaction);
+
+            return response.getBody().getData();
+        }
+        return Objects.requireNonNull(response.getBody()).getData();
     }
 
     @Override

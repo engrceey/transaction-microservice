@@ -45,5 +45,4 @@ public class Transaction extends BaseEntity {
     @Builder.Default
     private TransactionStatus transactionStatus = TransactionStatus.PENDING;
 
-
 }

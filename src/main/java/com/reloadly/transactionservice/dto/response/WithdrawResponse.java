@@ -2,12 +2,14 @@ package com.reloadly.transactionservice.dto.response;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AccountTransactionResponseDto<T> {
+public class WithdrawResponse {
     private String statusMessage;
     private boolean isSuccessful;
-    private T data;
+    private WithdrawResponseDto data;
 }

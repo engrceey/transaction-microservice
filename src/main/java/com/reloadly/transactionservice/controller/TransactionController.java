@@ -5,10 +5,12 @@ import com.reloadly.transactionservice.dto.request.DepositRequestDto;
 import com.reloadly.transactionservice.dto.request.TransferRequestDto;
 import com.reloadly.transactionservice.dto.request.WithdrawalRequestDto;
 import com.reloadly.transactionservice.dto.response.*;
+import com.reloadly.transactionservice.entity.Transaction;
 import com.reloadly.transactionservice.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,6 +68,24 @@ public class TransactionController {
         return ResponseEntity.ok(ApiResponse.<WithdrawResponseDto>builder()
                 .isSuccessful(true)
                 .statusMessage("Withdraw successfully")
+                .data(response)
+                .build()
+        );
+    }
+
+
+    @GetMapping(path = "transactions", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponse<PaginatedResponse<Transaction>>> getAllTransaction(
+            @RequestParam(required = false, defaultValue = "0") int start,
+            @RequestParam(required = false, defaultValue = "5") int limit
+    ) {
+
+        log.info("Transaction getAllTransaction - fetching all transactions");
+        PaginatedResponse<Transaction> response = transactionService.getTransactions(start, limit);
+
+        return ResponseEntity.ok().body(ApiResponse.<PaginatedResponse<Transaction>>builder()
+                .isSuccessful(true)
+                .statusMessage("Fetched Transaction")
                 .data(response)
                 .build()
         );

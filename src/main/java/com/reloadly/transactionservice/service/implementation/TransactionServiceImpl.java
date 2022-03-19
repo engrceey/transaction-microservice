@@ -8,16 +8,20 @@ import com.reloadly.transactionservice.dto.request.WithdrawalRequestDto;
 import com.reloadly.transactionservice.dto.response.*;
 import com.reloadly.transactionservice.entity.Transaction;
 import com.reloadly.transactionservice.exceptions.CustomException;
+import com.reloadly.transactionservice.exceptions.ResourceNotFoundException;
 import com.reloadly.transactionservice.repository.TransactionRepository;
 import com.reloadly.transactionservice.service.TransactionService;
+import com.reloadly.transactionservice.utils.ModelMapperUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -119,7 +123,6 @@ public class TransactionServiceImpl implements TransactionService {
         log.info("Service withdraw - withdraw funds for ::[{}]", withdrawalRequestDto.getAmount());
         final String url = String.format("%s/withdraw-fund", ACCOUNT_TRANSACTION_BASE_URL);
 
-
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set(HttpHeaders.AUTHORIZATION, bearerToken);
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -156,8 +159,16 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public TransactionResponseDto getAccountTransactions(long accountNumber) {
-        return null;
+    @Transactional(readOnly = true)
+    public PaginatedResponse<Transaction> getTransactions(int start, int limit) {
+        Page<Transaction> transactions = transactionRepository.findAll(PageRequest.of(start, limit));
+        if (transactions.isEmpty()) {
+            throw new ResourceNotFoundException("No Transaction found");
+        }
+        return PaginatedResponse.<Transaction>builder()
+                .content(ModelMapperUtils.mapAll(transactions.getContent(), Transaction.class))
+                .totalElements(transactions.getTotalElements())
+                .build();
     }
 
 }

@@ -1,9 +1,7 @@
 package com.reloadly.transactionservice.dto.request;
 
-import com.reloadly.transactionservice.constants.TransactionType;
 import lombok.Data;
 
-import javax.persistence.Column;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;

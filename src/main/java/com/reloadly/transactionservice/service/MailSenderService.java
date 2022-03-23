@@ -1,8 +1,10 @@
 package com.reloadly.transactionservice.service;
 
-import com.reloadly.transactionservice.dto.request.TransferRequestDto;
-import com.reloadly.transactionservice.dto.response.TransactionNoticeResponse;
+import com.reloadly.transactionservice.dto.response.TransactionNotificationEmailDto;
 
 public interface MailSenderService {
-    TransactionNoticeResponse sendTransactionNotice(TransferRequestDto transferRequestDto);
+    void sendDepositTransactionNotice(TransactionNotificationEmailDto transactionNotificationEmailDto);
+    void sendTransferTransactionNotice(TransactionNotificationEmailDto transactionNotificationEmailDto);
+    void sendWithdrawalTransactionNotice(TransactionNotificationEmailDto transactionNotificationEmailDto);
+
 }

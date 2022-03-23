@@ -10,6 +10,7 @@ import com.reloadly.transactionservice.entity.Transaction;
 import com.reloadly.transactionservice.exceptions.CustomException;
 import com.reloadly.transactionservice.exceptions.ResourceNotFoundException;
 import com.reloadly.transactionservice.repository.TransactionRepository;
+import com.reloadly.transactionservice.service.MailSenderService;
 import com.reloadly.transactionservice.service.TransactionService;
 import com.reloadly.transactionservice.utils.ModelMapperUtils;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final RestTemplate restTemplate;
+    private final MailSenderService mailSenderService;
 
     @Override
     public DepositResponse depositFunds(DepositRequestDto depositRequestDto, String bearerToken) {
@@ -71,6 +73,8 @@ public class TransactionServiceImpl implements TransactionService {
             depositTransaction.setReceiverAccountNumber(depositRequestDto.getReceiverAccountNumber());
             depositTransaction.setTransactionId(transactionId);
             transactionRepository.save(depositTransaction);
+
+            mailSenderService.sendDepositTransactionNotice(ModelMapperUtils.map(depositTransaction, new TransactionNotificationEmailDto()));
 
             return response.getBody();
         }
@@ -113,6 +117,8 @@ public class TransactionServiceImpl implements TransactionService {
             transaction.setTransactionId(transactionId);
             transactionRepository.save(transaction);
 
+            mailSenderService.sendTransferTransactionNotice(ModelMapperUtils.map(transaction, new TransactionNotificationEmailDto()));
+
             return response.getBody().getData();
         }
         return Objects.requireNonNull(response.getBody()).getData();
@@ -152,6 +158,8 @@ public class TransactionServiceImpl implements TransactionService {
             transaction.setSenderAccountNumber(response.getBody().getData().getAccountNum());
             transaction.setTransactionId(transactionId);
             transactionRepository.save(transaction);
+
+            mailSenderService.sendWithdrawalTransactionNotice(ModelMapperUtils.map(transaction, new TransactionNotificationEmailDto()));
 
             return response.getBody().getData();
         }
